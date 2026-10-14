@@ -1,4 +1,5 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash
+from werkzeug.security import generate_password_hash
 
 from database.db import get_db, init_db, seed_db
 
@@ -32,8 +33,37 @@ def privacy():
     return render_template("privacy.html")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not name or not email or not password or not confirm_password:
+            return render_template("register.html", error="Missing data")
+
+        if password != confirm_password:
+            return render_template("register.html", error="Passwords do not match")
+
+        db = get_db()
+        existing_user = db.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
+
+        if existing_user:
+            db.close()
+            return render_template("register.html", error="Email already registered")
+
+        password_hash = generate_password_hash(password)
+        db.execute(
+            "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
+            (name, email, password_hash)
+        )
+        db.commit()
+        db.close()
+
+        return redirect(url_for("login"))
+
     return render_template("register.html")
 
 
