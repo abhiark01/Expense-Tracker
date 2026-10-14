@@ -7,172 +7,112 @@
 {% endblock %}
 
 {% block content %}
-
-<section class="hero">
-    <div class="hero-content">
-        <div class="hero-badge">
-        <span class="hero-badge-icon">◈</span>
-        <span class="hero-badge-text">Personal Finance Tracker</span>
+<section class="hero-section">
+    <!-- Free-plan badge -->
+    <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span class="hero-badge-text">Free to use · No credit card needed</span>
     </div>
-        <h1 class="hero-title">
-            Know where your<br>
-            <em>money goes</em>
-        </h1>
-        <p class="hero-subtitle">
-            Log expenses, understand your spending patterns,
-            and take control of your financial life —
-            one transaction at a time.
-        </p>
-        <div class="hero-actions">
-            <a href="{{ url_for('register') }}" class="btn-primary">Start tracking free</a>
-            <a href="{{ url_for('login') }}" class="btn-ghost">Sign in</a>
-            <a href="#" class="btn-ghost" id="openModalBtn">See how it works</a>
+
+    <!-- Main headline -->
+    <h1 class="hero-title">
+        <span class="line-1">Track every rupee.</span>
+        <span class="line-2">Know where it goes.</span>
+    </h1>
+
+    <!-- Supporting description -->
+    <p class="hero-subtitle">
+        Spendly helps you log expenses, spot patterns, and stay<br>
+        on budget — without the spreadsheet headache.
+    </p>
+
+    <!-- Call-to-action buttons -->
+    <div class="hero-actions">
+        <a href="{{ url_for('register') }}" class="btn-cta btn-black">Create free account</a>
+        <a href="{{ url_for('login') }}" class="btn-cta btn-black" id="openModalBtn">See how it works</a>
+    </div>
+
+    <!-- Dashboard Preview Card -->
+    <div class="dashboard-card">
+        <!-- Window controls -->
+        <div class="window-controls">
+            <span class="control-dot dot-red"></span>
+            <span class="control-dot dot-yellow"></span>
+            <span class="control-dot dot-green"></span>
         </div>
-    </div>
 
-    <div class="hero-visual">
-        <div class="mock-card">
-            <div class="mock-card-header">
-                <span class="mock-label">March 2026</span>
-                <span class="mock-total">₹12,450</span>
+        <!-- Summary cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <span class="summary-label">This month</span>
+                <span class="summary-value">₹18,240</span>
+                <span class="summary-trend negative">+12% vs last</span>
             </div>
-            <div class="mock-bars">
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Bills</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar" style="width: 72%"></div>
-                    </div>
-                    <span class="mock-amt">₹4,500</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Food</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-2" style="width: 52%"></div>
-                    </div>
-                    <span class="mock-amt">₹3,200</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Health</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-3" style="width: 33%"></div>
-                    </div>
-                    <span class="mock-amt">₹2,050</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Transport</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-4" style="width: 28%"></div>
-                    </div>
-                    <span class="mock-amt">₹1,800</span>
-                </div>
+            <div class="summary-card">
+                <span class="summary-label">Budget left</span>
+                <span class="summary-value">₹6,760</span>
+                <span class="summary-trend positive">43% remaining</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Transactions</span>
+                <span class="summary-value">34</span>
+                <span class="summary-trend neutral">this month</span>
             </div>
         </div>
+
+        <!-- Spending category panel -->
+        <div class="category-panel">
+            <div class="category-row">
+                <span class="category-label">Food</span>
+                <div class="category-track">
+                    <div class="category-fill fill-food" style="width: 71%;"></div>
+                </div>
+            </div>
+            <div class="category-row">
+                <span class="category-label">Travel</span>
+                <div class="category-track">
+                    <div class="category-fill fill-travel" style="width: 50%;"></div>
+                </div>
+            </div>
+            <div class="category-row">
+                <span class="category-label">Bills</span>
+                <div class="category-track">
+                    <div class="category-fill fill-bills" style="width: 40%;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<section class="features">
-    <div class="features-inner">
-        <div class="feature-card">
-            <div class="feature-icon">₹</div>
-            <h3 class="feature-title">Log expenses instantly</h3>
-            <p class="feature-body">Add any expense in seconds. Category, amount, date, description — all in one simple form.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">◎</div>
-            <h3 class="feature-title">Understand your patterns</h3>
-            <p class="feature-body">See exactly where your money goes with category breakdowns and monthly summaries.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">◷</div>
-            <h3 class="feature-title">Filter by time period</h3>
-            <p class="feature-body">View your spending for any date range — last week, last month, or a custom period.</p>
-        </div>
-    </div>
-</section>
-
-<section class="cta-section">
-    <div class="cta-inner">
-        <h2 class="cta-title">Ready to take control?</h2>
-        <p class="cta-body">Join thousands of people who track their expenses with Spendly.</p>
-        <a href="{{ url_for('register') }}" class="btn-primary">Create free account</a>
-    </div>
-</section>
-
-<!-- Modal for video -->
-<div id="videoModal" class="modal">
+<!-- Modal for video / demo if needed -->
+<div id="videoModal" class="modal" style="display: none;">
     <div class="modal-content">
         <span class="close-btn">&times;</span>
         <iframe id="videoFrame" width="560" height="315" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
 </div>
 
-<style>
-    /* Modal styles */
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5);
-        padding-top: 60px;
-    }
-    .modal-content {
-        background-color: #fefefe;
-        margin: 5% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 600px;
-        position: relative;
-        border-radius: 8px;
-    }
-    .close-btn {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        position: absolute;
-        top: 10px;
-        right: 20px;
-        cursor: pointer;
-    }
-    .close-btn:hover,
-    .close-btn:focus {
-        color: black;
-        text-decoration: none;
-    }
-    iframe {
-        border-radius: 4px;
-    }
-</style>
-
 <script>
-    // Get the modal
-    var modal = document.getElementById("videoModal");
-    var btn = document.getElementById("openModalBtn");
-    var span = document.getElementsByClassName("close-btn")[0];
-    var iframe = document.getElementById("videoFrame");
+    const modal = document.getElementById("videoModal");
+    const btn = document.getElementById("openModalBtn");
+    const span = document.getElementsByClassName("close-btn")[0];
+    const iframe = document.getElementById("videoFrame");
 
-    // When the user clicks the button, open the modal
-    btn.onclick = function(event) {
-        event.preventDefault();
-        modal.style.display = "block";
-        // Set the video source with autoplay
-        iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1";
+    if (btn) {
+        btn.onclick = function(event) {
+            event.preventDefault();
+            modal.style.display = "block";
+            iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1";
+        }
     }
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
-        // Stop the video by clearing the src
-        iframe.src = "";
+    if (span) {
+        span.onclick = function() {
+            modal.style.display = "none";
+            iframe.src = "";
+        }
     }
 
-    // When the user clicks anywhere outside of the modal, close it
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
@@ -180,5 +120,4 @@
         }
     }
 </script>
-
 {% endblock %}
