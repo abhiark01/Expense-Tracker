@@ -6,17 +6,6 @@ from werkzeug.security import generate_password_hash
 
 DB_PATH = "spendly.db"
 
-# Fixed category list — must match the values used across the app.
-CATEGORIES = [
-    "Food",
-    "Transport",
-    "Bills",
-    "Health",
-    "Entertainment",
-    "Shopping",
-    "Other",
-]
-
 
 def get_db():
     """Open a connection to spendly.db.
@@ -28,6 +17,25 @@ def get_db():
     db.row_factory = sqlite3.Row
     db.execute("PRAGMA foreign_keys = ON")
     return db
+
+
+def get_user_by_email(email):
+    """Return the user row for the given email, or None if not found."""
+    db = get_db()
+    user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    db.close()
+    return user
+
+# Fixed category list — must match the values used across the app.
+CATEGORIES = [
+    "Food",
+    "Transport",
+    "Bills",
+    "Health",
+    "Entertainment",
+    "Shopping",
+    "Other",
+]
 
 
 def init_db():

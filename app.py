@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-from werkzeug.security import generate_password_hash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
-from database.db import get_db, init_db, seed_db
+from database.db import get_db, init_db, seed_db, get_user_by_email
 
 app = Flask(__name__)
+app.secret_key = "spendly-dev-secret-key-change-in-production"
 
 # ------------------------------------------------------------------ #
 # Database setup — run once at startup so tables and seed data       #
@@ -35,6 +36,9 @@ def privacy():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     if request.method == "POST":
         name = request.form.get("name")
         email = request.form.get("email")
@@ -67,8 +71,27 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email or not password:
+            return render_template("login.html", error="Missing data")
+
+        user = get_user_by_email(email)
+
+        if not user or not check_password_hash(user["password_hash"], password):
+            return render_template("login.html", error="Invalid email or password")
+
+        session["user_id"] = user["id"]
+        # TODO: Redirect to dashboard after implementation
+        return redirect(url_for("landing"))
+
     return render_template("login.html")
 
 
@@ -78,7 +101,9 @@ def login():
 
 @app.route("/logout")
 def logout():
-    return "Logout — coming in Step 3"
+    session.clear()
+    flash("You have been logged out")
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")
@@ -93,12 +118,14 @@ def add_expense():
 
 @app.route("/expenses/<int:id>/edit")
 def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+    # TODO: Implement expense editing - Step 8
+    return f"Edit expense {id} — coming in Step 8"
 
 
 @app.route("/expenses/<int:id>/delete")
 def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+    # TODO: Implement expense deletion - Step 9
+    return f"Delete expense {id} — coming in Step 9"
 
 
 if __name__ == "__main__":
