@@ -7,6 +7,22 @@ app = Flask(__name__)
 app.secret_key = "spendly-dev-secret-key-change-in-production"
 
 # ------------------------------------------------------------------ #
+# Context processors — make current user available to all templates   #
+# ------------------------------------------------------------------ #
+
+@app.context_processor
+def inject_user():
+    """Make current user available in all templates."""
+    user_id = session.get("user_id")
+    if user_id:
+        db = get_db()
+        user = db.execute("SELECT id, name, email, created_at FROM users WHERE id = ?", (user_id,)).fetchone()
+        db.close()
+        if user:
+            return {"user": dict(user)}
+    return {"user": None}
+
+# ------------------------------------------------------------------ #
 # Database setup — run once at startup so tables and seed data       #
 # exist before any route is used.                                    #
 # ------------------------------------------------------------------ #
@@ -89,8 +105,7 @@ def login():
             return render_template("login.html", error="Invalid email or password")
 
         session["user_id"] = user["id"]
-        # TODO: Redirect to dashboard after implementation
-        return redirect(url_for("landing"))
+        return redirect(url_for("profile"))
 
     return render_template("login.html")
 
@@ -107,8 +122,71 @@ def logout():
 
 
 @app.route("/profile")
+
 def profile():
-    return "Profile page — coming in Step 4"
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    user_info = {
+        "name": "Demo User",
+        "email": "demo@spendly.com",
+        "avatar": "DU",
+        "member_since": "2022-01-15",
+    }
+    summary_stats = {
+        "total_spent": 795.50,
+        "tx_count": 12,
+        "top_category": "Food",
+        "avg_monthly": 450.25,
+    }
+    transactions = [
+        {"date": "2026-10-01", "description": "Lunch with colleague", "category": "Food", "amount": 7.5},
+        {"date": "2026-10-02", "description": "Movie night", "category": "Entertainment", "amount": 55.0},
+        {"date": "2026-10-03", "description": "Coffee", "category": "Food", "amount": 3.25},
+        {"date": "2026-10-04", "description": "Grocery shopping", "category": "Food", "amount": 42.5},
+        {"date": "2026-10-05", "description": "Bus pass", "category": "Transport", "amount": 18.0},
+        {"date": "2026-10-06", "description": "Electricity bill", "category": "Bills", "amount": 120.0},
+        {"date": "2026-10-07", "description": "Pharmacy", "category": "Health", "amount": 35.0},
+        {"date": "2026-10-08", "description": "Concert tickets", "category": "Entertainment", "amount": 85.0},
+        {"date": "2026-10-09", "description": "New headphones", "category": "Shopping", "amount": 89.99},
+        {"date": "2026-10-10", "description": "Charity donation", "category": "Other", "amount": 12.5},
+    ]
+    category_breakdown = [
+        {"category": "Food", "total": 245.50, "color": "var(--accent)"},
+        {"category": "Transport", "total": 180.00, "color": "var(--accent-2)"},
+        {"category": "Bills", "total": 450.00, "color": "var(--danger)"},
+        {"category": "Health", "total": 85.00, "color": "var(--accent-3, #9b59b6)"},
+        {"category": "Entertainment", "total": 120.00, "color": "var(--accent-4, #e74c3c)"},
+        {"category": "Shopping", "total": 210.00, "color": "var(--accent-5, #2980b9)"},
+        {"category": "Other", "total": 45.00, "color": "var(--ink-muted)"},
+    ]
+    monthly_trend = [
+        {"month": "2026-05", "total": 420.00},
+        {"month": "2026-06", "total": 510.50},
+        {"month": "2026-07", "total": 380.00},
+        {"month": "2026-08", "total": 620.75},
+        {"month": "2026-09", "total": 450.25},
+        {"month": "2026-10", "total": 795.50},
+    ]
+    category_totals = [
+        {"category": "Food", "total": 245.50, "color": "var(--accent)"},
+        {"category": "Transport", "total": 180.00, "color": "var(--accent-2)"},
+        {"category": "Bills", "total": 450.00, "color": "var(--danger)"},
+        {"category": "Health", "total": 85.00, "color": "var(--accent-3, #9b59b6)"},
+        {"category": "Entertainment", "total": 120.00, "color": "var(--accent-4, #e74c3c)"},
+        {"category": "Shopping", "total": 210.00, "color": "var(--accent-5, #2980b9)"},
+        {"category": "Other", "total": 45.00, "color": "var(--ink-muted)"},
+    ]
+    return render_template(
+        "profile.html",
+        user=user_info,
+        stats=summary_stats,
+        transactions=transactions,
+        categories=category_breakdown,
+        monthly_trend=monthly_trend,
+        category_totals=category_totals,
+    )
 
 
 @app.route("/expenses/add")

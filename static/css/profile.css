@@ -1,0 +1,400 @@
+/* ===================================================================== */
+/* Profile Page — Dashboard Layout                                       */
+/* Uses CSS variables from style.css — no hardcoded hex values           */
+/* ===================================================================== */
+
+.profile-dashboard {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+/* --- User Header Card ------------------------------------------------ */
+.profile-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.avatar-section {
+    flex-shrink: 0;
+}
+
+.avatar-initials {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: var(--paper);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    box-shadow: 0 4px 16px rgba(26, 71, 42, 0.3);
+}
+
+.user-meta {
+    min-width: 0;
+}
+
+.user-name {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--ink);
+    margin: 0 0 0.25rem;
+    letter-spacing: -0.01em;
+}
+
+.user-email {
+    color: var(--ink-muted);
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem;
+}
+
+.member-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.header-actions {
+    flex-shrink: 0;
+}
+
+/* --- Stats Grid ------------------------------------------------------ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-color: var(--accent-light);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.spending-icon { background: var(--accent-light); color: var(--accent); }
+.transactions-icon { background: var(--accent-2-light); color: var(--accent-2); }
+.category-icon { background: #e8f4f8; color: #3498db; }
+.avg-icon { background: #f9e9f8; color: #9b59b6; }
+
+.stat-content { display: flex; flex-direction: column; }
+
+.stat-value {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--ink);
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* --- Charts Grid ----------------------------------------------------- */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-card {
+    padding: 1.5rem;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.card-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin: 0;
+}
+
+.chart-period {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chart-container {
+    flex: 1;
+    height: 300px;
+    position: relative;
+}
+
+/* Donut chart legend */
+.chart-legend {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legend-label {
+    flex: 1;
+    color: var(--ink-soft);
+}
+
+.legend-value {
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.legend-pct {
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+}
+
+/* --- Table Cards ----------------------------------------------------- */
+.table-card {
+    padding: 0;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.table-card .card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 0;
+}
+
+.table-card .card-header h2 {
+    font-size: 1rem;
+}
+
+.view-all-link {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.view-all-link:hover { color: var(--accent-2); text-decoration: underline; }
+
+.table-wrapper { overflow-x: auto; }
+
+.table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table-card th,
+.table-card td {
+    padding: 0.875rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.table-card th {
+    background: var(--paper-warm);
+    font-weight: 600;
+    color: var(--ink-soft);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.table-card tbody tr:last-child td { border-bottom: none; }
+
+.table-card tbody tr:hover td { background: var(--paper-warm); }
+
+.amount-col {
+    font-family: var(--font-display);
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+}
+
+.pct-col {
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Badge styles — use CSS variables where possible */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--border-soft);
+    color: var(--ink-soft);
+}
+
+.food { background: var(--accent-light); color: var(--accent); }
+.transport { background: #e8f4f8; color: #3498db; }
+.bills { background: #fdf4e9; color: #e67e22; }
+.health { background: #f9e9f8; color: #9b59b6; }
+.entertainment { background: #fff3e6; color: #e74c3c; }
+.shopping { background: #f0f9ff; color: #2980b9; }
+.other { background: var(--border-soft); color: var(--ink-muted); }
+
+/* Progress bar in category table */
+.progress-bar {
+    height: 8px;
+    background: var(--border-soft);
+    border-radius: 999px;
+    overflow: hidden;
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* Category name cell */
+.category-name {
+    font-weight: 500;
+    color: var(--ink);
+}
+
+/* --- Buttons (reuse from style.css where possible) --- */
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+/* --- Responsive ------------------------------------------------------ */
+@media (max-width: 900px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container { height: 280px; }
+
+    .profile-header {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        grid-template-areas:
+            "avatar meta"
+            "avatar actions";
+    }
+
+    .avatar-section { grid-area: avatar; }
+    .user-meta { grid-area: meta; }
+    .header-actions { grid-area: actions; justify-self: start; margin-top: 0.5rem; }
+}
+
+@media (max-width: 600px) {
+    .profile-dashboard { padding: 1rem; gap: 1rem; }
+
+    .profile-header { padding: 1.25rem; }
+
+    .avatar-initials { width: 56px; height: 56px; font-size: 1.25rem; }
+
+    .user-name { font-size: 1.35rem; }
+
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+
+    .stat-card { padding: 1rem; }
+
+    .stat-icon { width: 40px; height: 40px; font-size: 1rem; }
+
+    .stat-value { font-size: 1.25rem; }
+
+    .chart-container { height: 250px; }
+
+    .table-card th,
+    .table-card td { padding: 0.75rem 1rem; }
+
+    .progress-bar { width: 80px; }
+}

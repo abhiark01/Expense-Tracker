@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Spendly</title>
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <div class="profile-dashboard">
+        <!-- User Header Card -->
+        <header class="card profile-header">
+            <div class="avatar-section">
+                <div class="avatar-initials">{{ user.avatar }}</div>
+            </div>
+            <div class="user-meta">
+                <h1 class="user-name">{{ user.name }}</h1>
+                <p class="user-email">{{ user.email }}</p>
+                <span class="member-badge">Member since {{ user.member_since }}</span>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('logout') }}" class="btn-ghost logout-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <article class="card stat-card">
+                <div class="stat-icon spending-icon">💸</div>
+                <div class="stat-content">
+                    <span class="stat-value">₹{{ stats.total_spent }}</span>
+                    <span class="stat-label">Total Spent</span>
+                </div>
+            </article>
+            <article class="card stat-card">
+                <div class="stat-icon transactions-icon">📋</div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.tx_count }}</span>
+                    <span class="stat-label">Transactions</span>
+                </div>
+            </article>
+            <article class="card stat-card">
+                <div class="stat-icon category-icon">🏷️</div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ stats.top_category }}</span>
+                    <span class="stat-label">Top Category</span>
+                </div>
+            </article>
+            <article class="card stat-card">
+                <div class="stat-icon avg-icon">📊</div>
+                <div class="stat-content">
+                    <span class="stat-value">₹{{ stats.avg_monthly }}</span>
+                    <span class="stat-label">Avg / Month</span>
+                </div>
+            </article>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-grid">
+            <article class="card chart-card">
+                <header class="card-header">
+                    <h2>Spending Trend</h2>
+                    <span class="chart-period">Last 6 months</span>
+                </header>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </article>
+            <article class="card chart-card">
+                <header class="card-header">
+                    <h2>Category Distribution</h2>
+                    <span class="chart-period">All time</span>
+                </header>
+                <div class="chart-container">
+                    <canvas id="donutChart"></canvas>
+                </div>
+                <div class="chart-legend" id="donutLegend"></div>
+            </article>
+        </section>
+
+        <!-- Transactions Table -->
+        <section class="card table-card">
+            <header class="card-header">
+                <h2>Recent Transactions</h2>
+                <a href="#" class="view-all-link">View All</a>
+            </header>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th class="amount-col">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in transactions %}
+                        <tr>
+                            <td>{{ tx.date }}</td>
+                            <td>{{ tx.description }}</td>
+                            <td><span class="badge {{ tx.category | lower }}">{{ tx.category }}</span></td>
+                            <td class="amount-col">₹{{ tx.amount }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Category Breakdown Table -->
+        <section class="card table-card">
+            <header class="card-header">
+                <h2>Category Breakdown</h2>
+            </header>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Progress</th>
+                            <th class="amount-col">Amount</th>
+                            <th class="pct-col">% of Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cat in categories %}
+                        <tr>
+                            <td>
+                                <span class="category-name">{{ cat.category }}</span>
+                            </td>
+                            <td>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ cat.total / stats.total_spent * 100 }}%; background: {{ cat.color }}"></div>
+                                </div>
+                            </td>
+                            <td class="amount-col">₹{{ cat.total }}</td>
+                            <td class="pct-col">{{ (cat.total / stats.total_spent * 100) | round(1) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Chart data injected from template
+        const monthlyTrend = {{ monthly_trend | tojson }};
+        const categoryTotals = {{ category_totals | tojson }};
+
+        // Spending Trend Line Chart
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: monthlyTrend.map(d => d.month),
+                datasets: [{
+                    label: 'Monthly Spending (₹)',
+                    data: monthlyTrend.map(d => d.total),
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--accent-light').trim(),
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--paper-card').trim(),
+                    pointBorderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
+                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--paper').trim(),
+                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--paper').trim(),
+                        padding: 12,
+                        callbacks: {
+                            label: ctx => `₹${ctx.parsed.y.toFixed(2)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim() }
+                    },
+                    y: {
+                        grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--border-soft').trim() },
+                        ticks: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim(),
+                            callback: val => '₹' + val
+                        },
+                        beginAtZero: true
+                    }
+                },
+                interaction: { intersect: false, mode: 'index' }
+            }
+        });
+
+        // Category Distribution Donut Chart
+        const donutCtx = document.getElementById('donutChart').getContext('2d');
+        const donutChart = new Chart(donutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: categoryTotals.map(d => d.category),
+                datasets: [{
+                    data: categoryTotals.map(d => d.total),
+                    backgroundColor: categoryTotals.map(d => d.color),
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
+                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--paper').trim(),
+                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--paper').trim(),
+                        padding: 12,
+                        callbacks: {
+                            label: ctx => `${ctx.label}: ₹${ctx.parsed.toFixed(2)} (${((ctx.parsed / ctx.dataset.data.reduce((a,b)=>a+b,0))*100).toFixed(1)}%)`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Generate custom legend for donut chart
+        const legendContainer = document.getElementById('donutLegend');
+        categoryTotals.forEach((cat, i) => {
+            const total = categoryTotals.reduce((sum, c) => sum + c.total, 0);
+            const pct = ((cat.total / total) * 100).toFixed(1);
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.innerHTML = `
+                <span class="legend-color" style="background: ${cat.color}"></span>
+                <span class="legend-label">${cat.category}</span>
+                <span class="legend-value">₹${cat.total.toFixed(2)}</span>
+                <span class="legend-pct">${pct}%</span>
+            `;
+            legendContainer.appendChild(item);
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>
