@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Summary Statistics{% endblock %}
+{% block content %}
+<h2 class="my-4">Summary Statistics</h2>
+
+<div class="row">
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Total Spent</h5>
+        <p class="card-text display-4">₹{{ "%.2f"|format(stats.total_spent) }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Transaction Count</h5>
+        <p class="card-text display-4">{{ stats.tx_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Top Category</h5>
+        <p class="card-text display-4">{{ stats.top_category }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Average Monthly</h5>
+        <p class="card-text display-4">₹{{ "%.2f"|format(stats.avg_monthly) }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

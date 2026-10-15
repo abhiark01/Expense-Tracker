@@ -26,6 +26,17 @@ def get_user_by_email(email):
     db.close()
     return user
 
+
+def get_expenses_by_user(user_id):
+    """Return all expenses for the given user, ordered by date descending."""
+    db = get_db()
+    expenses = db.execute(
+        "SELECT id, amount, category, date, description FROM expenses WHERE user_id = ? ORDER BY date DESC",
+        (user_id,)
+    ).fetchall()
+    db.close()
+    return [dict(expense) for expense in expenses]
+
 # Fixed category list — must match the values used across the app.
 CATEGORIES = [
     "Food",
@@ -114,3 +125,74 @@ def seed_db():
     )
     db.commit()
     db.close()
+
+# --------------------------------------------------------------------------
+# New helper functions for profile page
+# --------------------------------------------------------------------------
+
+def get_summary_stats(user_id: int):
+    """Return summary statistics for a user's expenses.
+
+    Returns a dict with keys:
+        total_spent, tx_count, top_category, avg_monthly
+    """
+    db = get_db()
+    # Total spent
+    total = db.execute(
+        "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()[0]
+    # Transaction count
+    count = db.execute(
+        "SELECT COUNT(*) FROM expenses WHERE user_id = ?",
+        (user_id,)
+    ).fetchone()[0]
+    # Top category by total amount
+    top_row = db.execute(
+        "SELECT category FROM expenses WHERE user_id = ? GROUP BY category ORDER BY SUM(amount) DESC LIMIT 1",
+        (user_id,)
+    ).fetchone()
+    top_category = top_row[0] if top_row else None
+    # Average monthly spend: sum per month then average across months
+    month_totals = db.execute(
+        "SELECT SUM(amount) FROM expenses WHERE user_id = ? GROUP BY strftime('%Y-%m', date)",
+        (user_id,)
+    ).fetchall()
+    # month_totals is list of tuples like (sum,)
+    month_values = [row[0] for row in month_totals]
+    avg_monthly = sum(month_values) / len(month_values) if month_values else 0
+    db.close()
+    return {
+        "total_spent": float(total),
+        "tx_count": int(count),
+        "top_category": top_category,
+        "avg_monthly": float(avg_monthly),
+    }
+
+def get_category_breakdown(user_id: int):
+    """Return a list of category breakdowns with totals and colour vars.
+
+    Each dict contains: category, total, color.
+    """
+    colour_palette = [
+        "var(--accent)",
+        "var(--accent-2)",
+        "var(--accent-3)",
+        "var(--accent-4)",
+        "var(--accent-5)",
+        "var(--accent-6)",
+    ]
+    db = get_db()
+    results = []
+    for idx, cat in enumerate(CATEGORIES):
+        total = db.execute(
+            "SELECT COALESCE(SUM(amount), 0) FROM expenses WHERE user_id = ? AND category = ?",
+            (user_id, cat)
+        ).fetchone()[0]
+        results.append({
+            "category": cat,
+            "total": float(total),
+            "color": colour_palette[idx % len(colour_palette)],
+        })
+    db.close()
+    return results
