@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import date
+from datetime import date, datetime
 
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, CATEGORIES
 
 app = Flask(__name__)
 app.secret_key = "spendly-dev-secret-key-change-in-production"
@@ -105,6 +105,7 @@ def login():
         if not user or not check_password_hash(user["password_hash"], password):
             return render_template("login.html", error="Invalid email or password")
 
+        session.clear()
         session["user_id"] = user["id"]
         return redirect(url_for("profile"))
 
@@ -170,15 +171,45 @@ def profile():
         "member_since": member_since or created_at
     }
 
-    expenses = get_expenses_by_user(user_id)
-    raw_stats = get_summary_stats(user_id)
-    category_breakdown_data = get_category_breakdown(user_id)
+    # Parse optional date range filters
+    # Support both old param names (start_date/end_date) and new preset names (date_from/date_to)
+    start_date_str = request.args.get('start_date') or request.args.get('date_from')
+    end_date_str = request.args.get('end_date') or request.args.get('date_to')
 
-    total_spent = float(raw_stats.get("total_spent", 0))
-    tx_count = int(raw_stats.get("tx_count", 0))
+    start_date_val = None
+    end_date_val = None
+    try:
+        if start_date_str:
+            start_date_val = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        if end_date_str:
+            end_date_val = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        start_date_val = None
+        end_date_val = None
+
+    if start_date_val and end_date_val and start_date_val > end_date_val:
+        start_date_val, end_date_val = None, None
+
+    expenses = get_expenses_by_user(
+        user_id,
+        start_date_val.isoformat() if start_date_val else None,
+        end_date_val.isoformat() if end_date_val else None
+    )
+
+    # Compute summary stats and category breakdown based on filtered expenses
+    total_spent = sum(float(exp.get("amount", 0)) for exp in expenses)
+    tx_count = len(expenses)
     avg_transaction = total_spent / tx_count if tx_count else 0.0
 
-    # This month's spending
+    # Top category from filtered expenses
+    cat_totals = {}
+    for exp in expenses:
+        cat = exp.get("category", "Other")
+        cat_totals[cat] = cat_totals.get(cat, 0.0) + float(exp.get("amount", 0))
+
+    top_category = max(cat_totals, key=cat_totals.get) if cat_totals else None
+
+    # This month's spending within filtered expenses or overall? Usually within filtered or current month. Let's compute based on filtered expenses matching current month or just general.
     today = date.today()
     this_month_prefix = f"{today.year}-{today.month:02d}"
     this_month = 0.0
@@ -191,13 +222,45 @@ def profile():
         "tx_count": tx_count,
         "avg_transaction": avg_transaction,
         "this_month": this_month,
+        "top_category": top_category,
     }
 
-    # Rename category keys for the template: name / amount
-    categories = [
-        {"name": c["category"], "amount": c["total"]}
-        for c in category_breakdown_data
+    # Category breakdown for filtered expenses
+    colour_palette = [
+        "var(--accent)",
+        "var(--accent-2)",
+        "var(--accent-3)",
+        "var(--accent-4)",
+        "var(--accent-5)",
+        "var(--accent-6)",
     ]
+    categories = []
+    for idx, cat_name in enumerate(CATEGORIES):
+        amt = cat_totals.get(cat_name, 0.0)
+        pct = (amt / total_spent * 100) if total_spent > 0 else 0.0
+        categories.append({
+            "name": cat_name,
+            "amount": amt,
+            "percentage": pct,
+            "color": colour_palette[idx % len(colour_palette)]
+        })
+
+    # Compute date presets for quick filters
+    today = date.today()
+    # Helper to get start date of month given offset months from today
+    def month_start(offset_months):
+        # offset_months: 0 for this month, -1 for last month, etc.
+        total_months = today.year * 12 + today.month - 1 + offset_months
+        year = total_months // 12
+        month = total_months % 12 + 1
+        return date(year, month, 1)
+
+    presets = {
+        'all_time': {'date_from': None, 'date_to': None},
+        'this_month': {'date_from': month_start(0), 'date_to': today},
+        'last_3_months': {'date_from': month_start(-2), 'date_to': today},
+        'last_6_months': {'date_from': month_start(-5), 'date_to': today},
+    }
 
     return render_template(
         "profile.html",
@@ -205,6 +268,9 @@ def profile():
         stats=stats,
         transactions=expenses,
         categories=categories,
+        presets=presets,
+        start_date=start_date_str or "",
+        end_date=end_date_str or "",
     )
 
 # New profile sub‑routes
@@ -258,4 +324,6 @@ def delete_expense(id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    # Debug mode should be disabled in production
+    # Use FLASK_ENV=development to enable debug mode
+    app.run(port=5001)

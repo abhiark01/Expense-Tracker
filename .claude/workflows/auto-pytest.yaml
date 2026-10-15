@@ -1,0 +1,13 @@
+---
+name: auto-pytest
+description: "Automatically run spendly-pytest-writer after a feature implementation (step)."
+---
+
+export const meta = {
+  name: "auto-pytest",
+  description: "Run spendly-pytest-writer for the latest implemented spec after each commit.",
+};
+
+// This simple workflow expects the spec name as an argument.
+// It invokes the spendly-pytest-writer subagent with that spec.
+await agent(`spendly-pytest-writer ${process.argv[2]}`);

@@ -1,143 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile | Spendly</title>
-    {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    {% endblock %}
-</head>
-<body>
-    {% block content %}
-    <div class="profile-dashboard">
-        <!-- Welcome / User Header Card -->
-        <header class="card profile-header">
-            <div class="avatar-section">
-                <div class="avatar-initials">{{ user.avatar }}</div>
+{% extends "base.html" %}
+{% block title %}Profile — Spendly{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+{% block content %}
+<div class="profile-dashboard">
+    <!-- Profile Header Card -->
+    <header class="card profile-header">
+        <div class="avatar-section">
+            <div class="avatar-initials">{{ user.avatar }}</div>
+        </div>
+        <div class="user-meta">
+            <h1 class="user-name">Welcome, {{ user.name }}</h1>
+            <p class="user-email">{{ user.email }}</p>
+            <span class="member-badge">Member since {{ user.member_since }}</span>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('add_expense') }}" class="btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Expense
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-ghost logout-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Logout
+            </a>
+        </div>
+    </header>
+
+    <!-- Spending Summary Cards -->
+    <section class="stats-grid">
+        <article class="card stat-card">
+            <div class="stat-icon spending-icon">💸</div>
+            <div class="stat-content">
+                <span class="stat-value">₹{{ "{:.2f}".format(stats.total_spent) }}</span>
+                <span class="stat-label">Total Money Spent</span>
             </div>
-            <div class="user-meta">
-                <h1 class="user-name">Welcome, {{ user.name }}</h1>
-                <p class="user-email">{{ user.email }}</p>
-                <span class="member-badge">Member since {{ user.member_since }}</span>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-icon transactions-icon">📋</div>
+            <div class="stat-content">
+                <span class="stat-value">{{ stats.tx_count }}</span>
+                <span class="stat-label">Total Transactions</span>
             </div>
-            <div class="header-actions">
-                <a href="{{ url_for('add_expense') }}" class="btn-primary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Add Expense
-                </a>
-                <a href="{{ url_for('logout') }}" class="btn-ghost logout-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                    Logout
-                </a>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-icon avg-icon">📊</div>
+            <div class="stat-content">
+                <span class="stat-value">₹{{ "{:.2f}".format(stats.avg_transaction) }}</span>
+                <span class="stat-label">Average Transaction</span>
             </div>
+        </article>
+        <article class="card stat-card">
+            <div class="stat-icon month-icon">📅</div>
+            <div class="stat-content">
+                <span class="stat-value">₹{{ "{:.2f}".format(stats.this_month) }}</span>
+                <span class="stat-label">This Month's Spending</span>
+            </div>
+        </article>
+    </section>
+
+    <!-- Date Filter Section -->
+    <section class="card table-card date-filter-section">
+        <div class="table-wrapper">
+            <form method="get" action="{{ url_for('profile') }}" class="date-filter-form">
+                <div class="filter-controls">
+                    <!-- Quick Filter Buttons -->
+                    <a href="{{ url_for('profile') }}" class="quick-filter-btn{% if not start_date and not end_date %} active{% endif %}">All Time</a>
+                    <a href="{{ url_for('profile', date_from=presets.this_month.date_from|default(''), date_to=presets.this_month.date_to|default('') ) }}" class="quick-filter-btn{% if start_date == presets.this_month.date_from|default('') and end_date == presets.this_month.date_to|default('') %} active{% endif %}">This Month</a>
+                    <a href="{{ url_for('profile', date_from=presets.last_3_months.date_from|default(''), date_to=presets.last_3_months.date_to|default('') ) }}" class="quick-filter-btn{% if start_date == presets.last_3_months.date_from|default('') and end_date == presets.last_3_months.date_to|default('') %} active{% endif %}">Last 3 Months</a>
+                    <a href="{{ url_for('profile', date_from=presets.last_6_months.date_from|default(''), date_to=presets.last_6_months.date_to|default('') ) }}" class="quick-filter-btn{% if start_date == presets.last_6_months.date_from|default('') and end_date == presets.last_6_months.date_to|default('') %} active{% endif %}">Last 6 Months</a>
+                    <!-- Custom Date Range -->
+                    <div class="date-input">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" name="start_date" id="start_date" value="{{ start_date or '' }}" />
+                    </div>
+                    <span class="date-separator">to</span>
+                    <div class="date-input">
+                        <label for="end_date">End Date</label>
+                        <input type="date" name="end_date" id="end_date" value="{{ end_date or '' }}" />
+                    </div>
+                    <button type="submit" class="btn-success">Apply</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Recent Transactions -->
+    <section class="card table-card">
+        <header class="card-header">
+            <h2>Recent Transactions</h2>
         </header>
-
-        <!-- Financial Summary Cards -->
-        <section class="stats-grid">
-            <article class="card stat-card">
-                <div class="stat-icon spending-icon">💸</div>
-                <div class="stat-content">
-                    <span class="stat-value">₹{{ "%.2f"|format(stats.total_spent) }}</span>
-                    <span class="stat-label">Total Money Spent</span>
-                </div>
-            </article>
-            <article class="card stat-card">
-                <div class="stat-icon transactions-icon">📋</div>
-                <div class="stat-content">
-                    <span class="stat-value">{{ stats.tx_count }}</span>
-                    <span class="stat-label">Total Transactions</span>
-                </div>
-            </article>
-            <article class="card stat-card">
-                <div class="stat-icon avg-icon">📊</div>
-                <div class="stat-content">
-                    <span class="stat-value">₹{{ "%.2f"|format(stats.avg_transaction) }}</span>
-                    <span class="stat-label">Average Transaction</span>
-                </div>
-            </article>
-            <article class="card stat-card">
-                <div class="stat-icon month-icon">📅</div>
-                <div class="stat-content">
-                    <span class="stat-value">₹{{ "%.2f"|format(stats.this_month) }}</span>
-                    <span class="stat-label">This Month's Spending</span>
-                </div>
-            </article>
-        </section>
-
-        <!-- Recent Transaction History -->
-        <section class="card table-card">
-            <header class="card-header">
-                <h2>Recent Transactions</h2>
-            </header>
-            <div class="table-wrapper">
-                {% if transactions %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th class="amount-col">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for tx in transactions %}
-                        <tr>
-                            <td>{{ tx.date }}</td>
-                            <td><span class="badge {{ tx.category | lower }}">{{ tx.category }}</span></td>
-                            <td>{{ tx.description }}</td>
-                            <td class="amount-col">₹{{ "%.2f"|format(tx.amount) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="empty-state">
-                    <p>No transactions yet. Add your first expense to get started.</p>
-                </div>
-                {% endif %}
+        <div class="table-wrapper">
+            {% if transactions %}
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td>{{ tx.date }}</td>
+                        <td>{{ tx.description }}</td>
+                        <td>
+                            <span class="badge badge-{{ tx.category | lower }}">{{ tx.category }}</span>
+                        </td>
+                        <td class="text-end">₹{{ "{:.2f}".format(tx.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p>No transactions found for the selected period.</p>
+                <p>Try adjusting your date filter or add your first expense.</p>
             </div>
-        </section>
+            {% endif %}
+        </div>
+    </section>
 
-        <!-- Expense Categories -->
-        <section class="card table-card">
-            <header class="card-header">
-                <h2>Expense Categories</h2>
-            </header>
-            <div class="table-wrapper">
-                {% if categories %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th class="amount-col">Amount Spent</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for cat in categories %}
-                        <tr>
-                            <td><span class="category-name">{{ cat.name }}</span></td>
-                            <td class="amount-col">₹{{ "%.2f"|format(cat.amount) }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="empty-state">
-                    <p>No category spending yet. Add your first expense to get started.</p>
-                </div>
-                {% endif %}
+    <!-- Expense Categories -->
+    <section class="card table-card">
+        <header class="card-header">
+            <h2>Spending by Category</h2>
+        </header>
+        <div class="table-wrapper">
+            {% if categories %}
+            <table class="category-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-end">Amount Spent</th>
+                        <th class="text-end">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td>
+                            <span class="category-name">{{ cat.name }}</span>
+                        </td>
+                        <td class="text-end">₹{{ "{:.2f}".format(cat.amount) }}</td>
+                        <td class="text-end">{{ "{:.1f}".format(cat.percentage|default(0)) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p>No category data available for the selected period.</p>
             </div>
-        </section>
-    </div>
-    {% endblock %}
-</body>
-</html>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
