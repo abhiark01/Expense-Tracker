@@ -27,13 +27,24 @@ def get_user_by_email(email):
     return user
 
 
-def get_expenses_by_user(user_id):
-    """Return all expenses for the given user, ordered by date descending."""
+def get_expenses_by_user(user_id, start_date=None, end_date=None):
+    """Return all expenses for the given user, ordered by date descending.
+    Optional start_date and end_date filter the results using a BETWEEN clause.
+    """
     db = get_db()
-    expenses = db.execute(
-        "SELECT id, amount, category, date, description FROM expenses WHERE user_id = ? ORDER BY date DESC",
-        (user_id,)
-    ).fetchall()
+    query = "SELECT id, amount, category, date, description FROM expenses WHERE user_id = ?"
+    params = [user_id]
+    if start_date and end_date:
+        query += " AND date BETWEEN ? AND ?"
+        params.extend([start_date, end_date])
+    elif start_date:
+        query += " AND date >= ?"
+        params.append(start_date)
+    elif end_date:
+        query += " AND date <= ?"
+        params.append(end_date)
+    query += " ORDER BY date DESC"
+    expenses = db.execute(query, tuple(params)).fetchall()
     db.close()
     return [dict(expense) for expense in expenses]
 
