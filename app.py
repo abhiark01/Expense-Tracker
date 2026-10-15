@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from database.db import get_db, init_db, seed_db, get_user_by_email
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, get_monthly_trend
 
 app = Flask(__name__)
 app.secret_key = "spendly-dev-secret-key-change-in-production"
@@ -187,6 +187,38 @@ def profile():
         monthly_trend=monthly_trend,
         category_totals=category_totals,
     )
+
+# New profile sub‑routes
+
+@app.route("/profile/transactions")
+def profile_transactions():
+    """Render the transaction history for the logged‑in user."""
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to view your profile.", "warning")
+        return redirect(url_for("login"))
+    expenses = get_expenses_by_user(user_id)
+    return render_template("profile_transactions.html", expenses=expenses)
+
+@app.route("/profile/summary")
+def profile_summary():
+    """Render summary statistics for the logged‑in user."""
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to view your profile.", "warning")
+        return redirect(url_for("login"))
+    stats = get_summary_stats(user_id)
+    return render_template("profile_summary.html", stats=stats)
+
+@app.route("/profile/categories")
+def profile_categories():
+    """Render category breakdown for the logged‑in user."""
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to view your profile.", "warning")
+        return redirect(url_for("login"))
+    categories = get_category_breakdown(user_id)
+    return render_template("profile_categories.html", categories=categories)
 
 
 @app.route("/expenses/add")

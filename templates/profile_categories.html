@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Category Breakdown{% endblock %}
+{% block content %}
+<h2 class="my-4">Category Breakdown</h2>
+
+{% if categories %}
+<div class="row row-cols-1 row-cols-md-2 g-4">
+  {% for cat in categories %}
+  <div class="col">
+    <div class="card h-100">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ cat.category }}</h5>
+        <div class="progress">
+          <div class="progress-bar bg-success" role="progressbar" style="width: {{ (cat.total / 1000.0) * 100 }}%;" aria-valuenow="{{ (cat.total / 1000.0) * 100 }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p class="card-text mt-auto"><strong>Total:</strong> ₹{{ "%.2f"|format(cat.total) }}</p>
+        <p class="card-text"><small class="text-muted">Color: {{ cat.color }}</small></p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>No category data available.</p>
+{% endif %}
+{% endblock %}
