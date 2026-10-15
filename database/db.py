@@ -130,16 +130,6 @@ def seed_db():
 # New helper functions for profile page
 # --------------------------------------------------------------------------
 
-def get_expenses_by_user(user_id: int):
-    """Return all expenses for the given user, ordered by date descending."""
-    db = get_db()
-    rows = db.execute(
-        "SELECT id, amount, category, date, description FROM expenses WHERE user_id = ? ORDER BY date DESC",
-        (user_id,)
-    ).fetchall()
-    db.close()
-    return [dict(row) for row in rows]
-
 def get_summary_stats(user_id: int):
     """Return summary statistics for a user's expenses.
 
@@ -206,20 +196,3 @@ def get_category_breakdown(user_id: int):
         })
     db.close()
     return results
-
-
-def get_monthly_trend(user_id: int):
-    """Return a list of monthly totals for the user, ordered by month ascending.
-
-    Each dict contains: month (string 'YYYY-MM'), total (float).
-    """
-    db = get_db()
-    rows = db.execute(
-        "SELECT strftime('%Y-%m', date) AS month, COALESCE(SUM(amount), 0) AS total "
-        "FROM expenses WHERE user_id = ? "
-        "GROUP BY month "
-        "ORDER BY month ASC",
-        (user_id,)
-    ).fetchall()
-    db.close()
-    return [{"month": row["month"], "total": float(row["total"])} for row in rows]

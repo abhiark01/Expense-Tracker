@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import date
 
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, get_monthly_trend
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown
 
 app = Flask(__name__)
 app.secret_key = "spendly-dev-secret-key-change-in-production"
@@ -122,70 +123,88 @@ def logout():
 
 
 @app.route("/profile")
-
 def profile():
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("login"))
 
+    db = get_db()
+    user_row = db.execute(
+        "SELECT id, name, email, created_at FROM users WHERE id = ?",
+        (user_id,)
+    ).fetchone()
+    db.close()
+
+    if not user_row:
+        session.clear()
+        flash("User not found.", "error")
+        return redirect(url_for("login"))
+
+    name = user_row["name"]
+    if len(name) >= 2:
+        avatar = name[0:2].upper()
+    else:
+        avatar = name[0].upper() if name else "?"
+
+    # Format member_since as "Month YYYY" (e.g. "January 2026")
+    created_at = user_row["created_at"]
+    member_since = ""
+    if created_at:
+        try:
+            parts = created_at.split("-")
+            if len(parts) >= 2:
+                month_names = [
+                    "", "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ]
+                month_idx = int(parts[1])
+                if 1 <= month_idx <= 12:
+                    member_since = f"{month_names[month_idx]} {parts[0]}"
+        except (ValueError, IndexError):
+            member_since = created_at
+
     user_info = {
-        "name": "Demo User",
-        "email": "demo@spendly.com",
-        "avatar": "DU",
-        "member_since": "2022-01-15",
+        "name": name,
+        "email": user_row["email"],
+        "avatar": avatar,
+        "member_since": member_since or created_at
     }
-    summary_stats = {
-        "total_spent": 795.50,
-        "tx_count": 12,
-        "top_category": "Food",
-        "avg_monthly": 450.25,
+
+    expenses = get_expenses_by_user(user_id)
+    raw_stats = get_summary_stats(user_id)
+    category_breakdown_data = get_category_breakdown(user_id)
+
+    total_spent = float(raw_stats.get("total_spent", 0))
+    tx_count = int(raw_stats.get("tx_count", 0))
+    avg_transaction = total_spent / tx_count if tx_count else 0.0
+
+    # This month's spending
+    today = date.today()
+    this_month_prefix = f"{today.year}-{today.month:02d}"
+    this_month = 0.0
+    for exp in expenses:
+        if exp.get("date") and exp["date"].startswith(this_month_prefix):
+            this_month += float(exp.get("amount", 0))
+
+    stats = {
+        "total_spent": total_spent,
+        "tx_count": tx_count,
+        "avg_transaction": avg_transaction,
+        "this_month": this_month,
     }
-    transactions = [
-        {"date": "2026-10-01", "description": "Lunch with colleague", "category": "Food", "amount": 7.5},
-        {"date": "2026-10-02", "description": "Movie night", "category": "Entertainment", "amount": 55.0},
-        {"date": "2026-10-03", "description": "Coffee", "category": "Food", "amount": 3.25},
-        {"date": "2026-10-04", "description": "Grocery shopping", "category": "Food", "amount": 42.5},
-        {"date": "2026-10-05", "description": "Bus pass", "category": "Transport", "amount": 18.0},
-        {"date": "2026-10-06", "description": "Electricity bill", "category": "Bills", "amount": 120.0},
-        {"date": "2026-10-07", "description": "Pharmacy", "category": "Health", "amount": 35.0},
-        {"date": "2026-10-08", "description": "Concert tickets", "category": "Entertainment", "amount": 85.0},
-        {"date": "2026-10-09", "description": "New headphones", "category": "Shopping", "amount": 89.99},
-        {"date": "2026-10-10", "description": "Charity donation", "category": "Other", "amount": 12.5},
+
+    # Rename category keys for the template: name / amount
+    categories = [
+        {"name": c["category"], "amount": c["total"]}
+        for c in category_breakdown_data
     ]
-    category_breakdown = [
-        {"category": "Food", "total": 245.50, "color": "var(--accent)"},
-        {"category": "Transport", "total": 180.00, "color": "var(--accent-2)"},
-        {"category": "Bills", "total": 450.00, "color": "var(--danger)"},
-        {"category": "Health", "total": 85.00, "color": "var(--accent-3, #9b59b6)"},
-        {"category": "Entertainment", "total": 120.00, "color": "var(--accent-4, #e74c3c)"},
-        {"category": "Shopping", "total": 210.00, "color": "var(--accent-5, #2980b9)"},
-        {"category": "Other", "total": 45.00, "color": "var(--ink-muted)"},
-    ]
-    monthly_trend = [
-        {"month": "2026-05", "total": 420.00},
-        {"month": "2026-06", "total": 510.50},
-        {"month": "2026-07", "total": 380.00},
-        {"month": "2026-08", "total": 620.75},
-        {"month": "2026-09", "total": 450.25},
-        {"month": "2026-10", "total": 795.50},
-    ]
-    category_totals = [
-        {"category": "Food", "total": 245.50, "color": "var(--accent)"},
-        {"category": "Transport", "total": 180.00, "color": "var(--accent-2)"},
-        {"category": "Bills", "total": 450.00, "color": "var(--danger)"},
-        {"category": "Health", "total": 85.00, "color": "var(--accent-3, #9b59b6)"},
-        {"category": "Entertainment", "total": 120.00, "color": "var(--accent-4, #e74c3c)"},
-        {"category": "Shopping", "total": 210.00, "color": "var(--accent-5, #2980b9)"},
-        {"category": "Other", "total": 45.00, "color": "var(--ink-muted)"},
-    ]
+
     return render_template(
         "profile.html",
         user=user_info,
-        stats=summary_stats,
-        transactions=transactions,
-        categories=category_breakdown,
-        monthly_trend=monthly_trend,
-        category_totals=category_totals,
+        stats=stats,
+        transactions=expenses,
+        categories=categories,
     )
 
 # New profile sub‑routes
