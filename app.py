@@ -116,6 +116,16 @@ def login():
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
 
+@app.route("/logout")
+def logout():
+    """Log the user out, clear the session and redirect to the landing page."""
+    session.clear()
+    flash("You have been logged out")
+    return redirect(url_for("landing"))
+
+
+
+
 @app.route("/analytics")
 def analytics():
     """Render the Coming‑Soon analytics page.
@@ -127,7 +137,6 @@ def analytics():
     if not session.get("user_id"):
         return redirect(url_for("login"))
     return render_template("analytics.html")
-
 
 
 @app.route("/profile")
