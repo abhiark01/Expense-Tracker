@@ -594,6 +594,21 @@ a { color: inherit; text-decoration: none; }
 /* Footer                                                              */
 /* ------------------------------------------------------------------ */
 
+.btn-delete {
+    background-color: var(--danger);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.btn-delete:hover {
+    background-color: var(--danger-dark);
+}
+
+
 .footer {
     background: var(--ink);
     color: var(--paper);

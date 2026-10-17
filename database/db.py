@@ -168,6 +168,18 @@ def update_expense(expense_id: int, user_id: int, amount: float, category: str, 
     return True
 
 
+def delete_expense_by_id(expense_id: int, user_id: int) -> bool:
+    """Delete an expense row if it belongs to the given user."""
+    db = get_db()
+    result = db.execute(
+        "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+        (expense_id, user_id)
+    )
+    db.commit()
+    db.close()
+    return result.rowcount > 0
+
+
 # --------------------------------------------------------------------------
 # New helper functions for profile page
 # --------------------------------------------------------------------------
