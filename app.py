@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
 
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, add_expense, get_expense_by_id, update_expense, CATEGORIES
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, add_expense, get_expense_by_id, update_expense , delete_expense_by_id , CATEGORIES
 
 import os
 app = Flask(__name__)
@@ -224,7 +224,7 @@ def profile():
         cat = exp.get("category", "Other")
         cat_totals[cat] = cat_totals.get(cat, 0.0) + float(exp.get("amount", 0))
 
-    top_category = max(cat_totals, key=cat_totals.get) if cat_totals else None
+    top_category = max("cat_totals", "key=cat_totals.get") if cat_totals else None
 
     # This month's spending within filtered expenses or overall? Usually within filtered or current month. Let's compute based on filtered expenses matching current month or just general.
     today = date.today()
@@ -341,6 +341,8 @@ def add_expense_route():
 
         # Validate amount
         try:
+            if amount_str is None or not amount_str.strip():
+                raise ValueError
             amount = float(amount_str)
             if amount <= 0:
                 raise ValueError
@@ -393,6 +395,8 @@ def edit_expense(id):
 
         # Validate amount
         try:
+            if amount_str is None or not amount_str.strip():
+                raise ValueError
             amount = float(amount_str)
             if amount <= 0:
                 raise ValueError
@@ -440,10 +444,23 @@ def edit_expense(id):
     )
 
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
 def delete_expense(id):
-    # TODO: Implement expense deletion - Step 9
-    return f"Delete expense {id} — coming in Step 9"
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to delete expenses.", "warning")
+        return redirect(url_for("login"))
+
+    # Check ownership using existing helper
+    expense = get_expense_by_id(id, user_id)
+    if not expense:
+        flash("Expense not found or you don't own it.", "error")
+        return redirect(url_for("profile"))
+
+    # Delete the expense
+    delete_expense_by_id(id, user_id)
+    flash("Expense deleted successfully.", "success")
+    return redirect(url_for("profile"))
 
 
 if __name__ == "__main__":
