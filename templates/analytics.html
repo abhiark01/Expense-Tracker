@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — Coming Soon{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <!-- Free‑plan badge -->
+    <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span class="hero-badge-text">Coming Soon – Analytics Module</span>
+    </div>
+
+    <!-- Main headline -->
+    <h1 class="hero-title">
+        <span class="line-1">Analytics</span>
+        <span class="line-2">Coming Soon</span>
+    </h1>
+
+    <!-- Supporting description -->
+    <p class="hero-subtitle">
+        Visualise your spending patterns with charts, trends and insights.
+        Stay tuned – the Analytics dashboard will be available shortly.
+    </p>
+
+    <!-- Call‑to‑action buttons (same as landing page for consistency) -->
+    <div class="hero-actions">
+        <a href="{{ url_for('profile') }}" class="btn-cta btn-black">Go to Profile</a>
+        <a href="{{ url_for('login') }}" class="btn-cta btn-black" id="openModalBtn">Learn more</a>
+    </div>
+
+    <!-- Mock dashboard card – re‑used from landing page for visual consistency -->
+    <div class="dashboard-card">
+        <div class="window-controls">
+            <span class="control-dot dot-red"></span>
+            <span class="control-dot dot-yellow"></span>
+            <span class="control-dot dot-green"></span>
+        </div>
+        <div class="summary-cards">
+            <div class="summary-card">
+                <span class="summary-label">This month</span>
+                <span class="summary-value">₹0</span>
+                <span class="summary-trend neutral">No data yet</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Budget left</span>
+                <span class="summary-value">—</span>
+                <span class="summary-trend neutral">—</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Transactions</span>
+                <span class="summary-value">0</span>
+                <span class="summary-trend neutral">0 this month</span>
+            </div>
+        </div>
+        <div class="category-panel">
+            <div class="category-row">
+                <span class="category-label">Food</span>
+                <div class="category-track"><div class="category-fill fill-food" style="width: 0%;"></div></div>
+            </div>
+            <div class="category-row">
+                <span class="category-label">Transport</span>
+                <div class="category-track"><div class="category-fill fill-transport" style="width: 0%;"></div></div>
+            </div>
+            <div class="category-row">
+                <span class="category-label">Bills</span>
+                <div class="category-track"><div class="category-fill fill-bills" style="width: 0%;"></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Optional modal – kept identical to landing page for consistency -->
+<div id="videoModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <iframe id="videoFrame" width="560" height="315" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById("videoModal");
+    const btn = document.getElementById("openModalBtn");
+    const span = document.getElementsByClassName("close-btn")[0];
+    const iframe = document.getElementById("videoFrame");
+    if (btn) {
+        btn.onclick = function(event) {
+            event.preventDefault();
+            modal.style.display = "block";
+            iframe.src = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1";
+        }
+    }
+    if (span) {
+        span.onclick = function() { modal.style.display = "none"; iframe.src = ""; }
+    }
+    window.onclick = function(event) { if (event.target == modal) { modal.style.display = "none"; iframe.src = ""; } }
+</script>
+{% endblock %}

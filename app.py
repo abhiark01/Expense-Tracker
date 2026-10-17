@@ -13,15 +13,15 @@ app.secret_key = "spendly-dev-secret-key-change-in-production"
 
 @app.context_processor
 def inject_user():
-    """Make current user available in all templates."""
+    """Make current user available in all templates, plus the current request path for active menu highlighting."""
     user_id = session.get("user_id")
     if user_id:
         db = get_db()
         user = db.execute("SELECT id, name, email, created_at FROM users WHERE id = ?", (user_id,)).fetchone()
         db.close()
         if user:
-            return {"user": dict(user)}
-    return {"user": None}
+            return {"user": dict(user), "request_path": request.path}
+    return {"user": None, "request_path": request.path}
 
 # ------------------------------------------------------------------ #
 # Database setup — run once at startup so tables and seed data       #
@@ -116,11 +116,18 @@ def login():
 # Placeholder routes — students will implement these                  #
 # ------------------------------------------------------------------ #
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    flash("You have been logged out")
-    return redirect(url_for("landing"))
+@app.route("/analytics")
+def analytics():
+    """Render the Coming‑Soon analytics page.
+
+    The page is only visible to logged‑in users. Unauthenticated visitors are
+    redirected to the login page, matching the behaviour of the other protected
+    routes in the app.
+    """
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+    return render_template("analytics.html")
+
 
 
 @app.route("/profile")

@@ -22,6 +22,7 @@
                 {% if session.get('user_id') and user %}
                     <span class="nav-user">Hello, {{ user.name }}</span>
                     <a href="{{ url_for('logout') }}">Log out</a>
+                    <a href="{{ url_for('analytics') }}" class="{% if request_path == '/analytics' %}nav-active{% endif %}">Analytics</a>
                 {% else %}
                     <a href="{{ url_for('login') }}">Sign in</a>
                     <a href="{{ url_for('register') }}" class="nav-cta">Get started</a>
