@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
 
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, add_expense, CATEGORIES
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, add_expense, get_expense_by_id, update_expense, CATEGORIES
 
 import os
 app = Flask(__name__)
@@ -370,10 +370,74 @@ def add_expense_route():
     return render_template("add_expense.html", categories=CATEGORIES, today=today_str)
 
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
 def edit_expense(id):
-    # TODO: Implement expense editing - Step 8
-    return f"Edit expense {id} — coming in Step 8"
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to edit expenses.", "warning")
+        return redirect(url_for("login"))
+
+    # Fetch the expense with ownership check
+    expense = get_expense_by_id(id, user_id)
+    if not expense:
+        flash("Expense not found or you don't own it.", "error")
+        return redirect(url_for("profile"))
+
+    today_str = date.today().isoformat()
+
+    if request.method == "POST":
+        amount_str = request.form.get("amount")
+        category = request.form.get("category")
+        exp_date = request.form.get("date") or today_str
+        description = request.form.get("description", "").strip()
+
+        # Validate amount
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return render_template(
+                "edit_expense.html",
+                expense=expense,
+                categories=CATEGORIES,
+                today=today_str,
+                error="Amount must be a positive number."
+            )
+
+        # Validate category
+        if category not in CATEGORIES:
+            return render_template(
+                "edit_expense.html",
+                expense=expense,
+                categories=CATEGORIES,
+                today=today_str,
+                error="Invalid category selected."
+            )
+
+        # Validate date format
+        try:
+            datetime.strptime(exp_date, '%Y-%m-%d')
+        except ValueError:
+            return render_template(
+                "edit_expense.html",
+                expense=expense,
+                categories=CATEGORIES,
+                today=today_str,
+                error="Invalid date format."
+            )
+
+        # Update expense
+        update_expense(id, user_id, amount, category, exp_date, description)
+        flash("Expense updated successfully.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template(
+        "edit_expense.html",
+        expense=expense,
+        categories=CATEGORIES,
+        today=today_str
+    )
 
 
 @app.route("/expenses/<int:id>/delete")
