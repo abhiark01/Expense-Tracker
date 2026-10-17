@@ -2,10 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime
 
-from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, CATEGORIES
+from database.db import get_db, init_db, seed_db, get_user_by_email, get_expenses_by_user, get_summary_stats, get_category_breakdown, add_expense, CATEGORIES
 
+import os
 app = Flask(__name__)
-app.secret_key = "spendly-dev-secret-key-change-in-production"
+app.secret_key = os.environ.get("SECRET_KEY", "spendly-dev-secret-key-change-in-production")
 
 # ------------------------------------------------------------------ #
 # Context processors — make current user available to all templates   #
@@ -13,15 +14,15 @@ app.secret_key = "spendly-dev-secret-key-change-in-production"
 
 @app.context_processor
 def inject_user():
-    """Make current user available in all templates."""
+    """Make current user available in all templates, plus the current request path for active menu highlighting."""
     user_id = session.get("user_id")
     if user_id:
         db = get_db()
         user = db.execute("SELECT id, name, email, created_at FROM users WHERE id = ?", (user_id,)).fetchone()
         db.close()
         if user:
-            return {"user": dict(user)}
-    return {"user": None}
+            return {"user": dict(user), "request_path": request.path}
+    return {"user": None, "request_path": request.path}
 
 # ------------------------------------------------------------------ #
 # Database setup — run once at startup so tables and seed data       #
@@ -118,9 +119,25 @@ def login():
 
 @app.route("/logout")
 def logout():
+    """Log the user out, clear the session and redirect to the landing page."""
     session.clear()
     flash("You have been logged out")
     return redirect(url_for("landing"))
+
+
+
+
+@app.route("/analytics")
+def analytics():
+    """Render the Coming‑Soon analytics page.
+
+    The page is only visible to logged‑in users. Unauthenticated visitors are
+    redirected to the login page, matching the behaviour of the other protected
+    routes in the app.
+    """
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+    return render_template("analytics.html")
 
 
 @app.route("/profile")
@@ -306,9 +323,51 @@ def profile_categories():
     return render_template("profile_categories.html", categories=categories)
 
 
-@app.route("/expenses/add")
-def add_expense():
-    return "Add expense — coming in Step 7"
+@app.route("/expenses/add", methods=["GET", "POST"], endpoint="add_expense")
+def add_expense_route():
+    """Render the Add Expense form or process a new expense submission."""
+    user_id = session.get("user_id")
+    if not user_id:
+        flash("Please log in to add expenses.", "warning")
+        return redirect(url_for("login"))
+
+    today_str = date.today().isoformat()
+
+    if request.method == "POST":
+        amount_str = request.form.get("amount")
+        category = request.form.get("category")
+        exp_date = request.form.get("date") or today_str
+        description = request.form.get("description", "").strip()
+
+        # Validate amount
+        try:
+            amount = float(amount_str)
+            if amount <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            return render_template(
+                "add_expense.html",
+                categories=CATEGORIES,
+                today=today_str,
+                error="Amount must be a positive number."
+            )
+
+        # Validate category
+        if category not in CATEGORIES:
+            return render_template(
+                "add_expense.html",
+                categories=CATEGORIES,
+                today=today_str,
+                error="Invalid category selected."
+            )
+
+        # Insert into database using helper from database/db.py
+        add_expense(user_id, amount, category, exp_date, description)
+
+        flash("Expense added successfully.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template("add_expense.html", categories=CATEGORIES, today=today_str)
 
 
 @app.route("/expenses/<int:id>/edit")

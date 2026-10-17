@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — Coming Soon{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="coming-soon-wrapper">
+    <div class="coming-soon-card">
+        <!-- Top Icon: Dark forest-green rounded square with white outlined clock -->
+        <div class="cs-icon-box">
+            <svg class="cs-clock-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <!-- Status pill -->
+        <div class="cs-status-pill">
+            Coming Soon
+        </div>
+
+        <!-- Heading -->
+        <h1 class="cs-heading">Advanced Analytics</h1>
+
+        <!-- Description -->
+        <p class="cs-description">
+            We're working on powerful insights and visualizations<br>
+            to help you understand your spending patterns better.
+        </p>
+
+        <!-- Loading decoration / dots -->
+        <div class="cs-dots">
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+        </div>
+
+        <!-- Footer caption -->
+        <p class="cs-caption">We're crafting something special</p>
+    </div>
+</div>
+{% endblock %}
