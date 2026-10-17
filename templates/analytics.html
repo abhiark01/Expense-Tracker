@@ -3,47 +3,42 @@
 {% block title %}Analytics — Coming Soon{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
-<style>
-    /* Analytics Coming Soon Overrides */
-    .hero-section { min-height: 70vh; justify-content: center; padding-top: 40px; }
-    .hero-title .line-2 { color: var(--accent-2); }
-    .analytics-visual {
-        margin-top: 40px;
-        background: var(--paper-warm);
-        border: 2px dashed var(--border);
-        border-radius: var(--radius-lg);
-        padding: 60px;
-        text-align: center;
-        max-width: 600px;
-        width: 100%;
-    }
-    .analytics-visual h3 { font-family: var(--font-display); margin-bottom: 10px; }
-    .analytics-visual p { color: var(--ink-muted); margin-bottom: 20px; }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
 {% endblock %}
 
 {% block content %}
-<section class="hero-section">
-    <div class="hero-badge">
-        <span class="hero-badge-dot" style="background-color: var(--accent-2);"></span>
-        <span class="hero-badge-text" style="color: var(--accent-2);">Under Construction</span>
+<div class="coming-soon-wrapper">
+    <div class="coming-soon-card">
+        <!-- Top Icon: Dark forest-green rounded square with white outlined clock -->
+        <div class="cs-icon-box">
+            <svg class="cs-clock-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+
+        <!-- Status pill -->
+        <div class="cs-status-pill">
+            Coming Soon
+        </div>
+
+        <!-- Heading -->
+        <h1 class="cs-heading">Advanced Analytics</h1>
+
+        <!-- Description -->
+        <p class="cs-description">
+            We're working on powerful insights and visualizations<br>
+            to help you understand your spending patterns better.
+        </p>
+
+        <!-- Loading decoration / dots -->
+        <div class="cs-dots">
+            <span class="dot dot-1"></span>
+            <span class="dot dot-2"></span>
+            <span class="dot dot-3"></span>
+        </div>
+
+        <!-- Footer caption -->
+        <p class="cs-caption">We're crafting something special</p>
     </div>
-
-    <h1 class="hero-title">
-        <span class="line-1">Advanced Analytics</span>
-        <span class="line-2">Coming Soon</span>
-    </h1>
-
-    <p class="hero-subtitle">
-        We are building a powerful insights engine to help you visualise your spending patterns.<br>
-        Stay tuned – your personal financial dashboard will be available shortly.
-    </p>
-
-    <div class="analytics-visual">
-        <h3>Something great is cooking</h3>
-        <p>Our team is currently finalising the charts and insight modules. Check back soon!</p>
-        <a href="{{ url_for('profile') }}" class="btn-primary">Back to Profile</a>
-    </div>
-</section>
+</div>
 {% endblock %}

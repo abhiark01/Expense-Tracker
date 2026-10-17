@@ -1,0 +1,191 @@
+/* ------------------------------------------------------------------ */
+/* Coming Soon Analytics Page Styles                                  */
+/* ------------------------------------------------------------------ */
+
+.coming-soon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 60px - 100px);
+    padding: 3rem 1.5rem;
+    background: radial-gradient(circle at center, #f4f6f5 0%, #e9ece9 100%);
+}
+
+.coming-soon-card {
+    position: relative;
+    width: 100%;
+    max-width: 768px;
+    background: #ffffff;
+    border-radius: 36px;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+    padding: 4.5rem 3rem 3.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Decorative quarter-circle corner shapes */
+.coming-soon-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: #f1f4f2;
+    border-bottom-left-radius: 120px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.coming-soon-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 120px;
+    height: 120px;
+    background: #f1f4f2;
+    border-top-right-radius: 120px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Top Icon: Dark forest-green rounded square with white clock */
+.cs-icon-box {
+    width: 120px;
+    height: 120px;
+    background: #143823;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(20, 56, 35, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+.cs-clock-icon {
+    width: 60px;
+    height: 60px;
+    color: #ffffff;
+}
+
+/* Status pill */
+.cs-status-pill {
+    display: inline-block;
+    background: #254a33;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.75rem;
+    border-radius: 999px;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 4px 12px rgba(37, 74, 51, 0.15);
+    position: relative;
+    z-index: 2;
+}
+
+/* Heading */
+.cs-heading {
+    font-family: var(--font-body);
+    font-size: 2.75rem;
+    font-weight: 700;
+    color: #143823;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    line-height: 1.15;
+    position: relative;
+    z-index: 2;
+}
+
+/* Description */
+.cs-description {
+    font-family: var(--font-body);
+    font-size: 1.35rem;
+    color: #526058;
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Loading decoration / dots */
+.cs-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.cs-dots .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #8aa092;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.cs-dots .dot-1 { background: #143823; }
+.cs-dots .dot-2 { background: #476854; }
+.cs-dots .dot-3 { background: #92a89a; }
+
+/* Footer caption */
+.cs-caption {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    color: #64748b;
+    font-weight: 500;
+    position: relative;
+    z-index: 2;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive Adjustments                                             */
+/* ------------------------------------------------------------------ */
+@media (max-width: 768px) {
+    .coming-soon-card {
+        padding: 3rem 1.5rem 2.5rem;
+        border-radius: 24px;
+    }
+
+    .coming-soon-card::before,
+    .coming-soon-card::after {
+        width: 80px;
+        height: 80px;
+    }
+
+    .cs-icon-box {
+        width: 90px;
+        height: 90px;
+        border-radius: 18px;
+        margin-bottom: 1.5rem;
+    }
+
+    .cs-clock-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .cs-heading {
+        font-size: 2rem;
+    }
+
+    .cs-description {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .cs-description br {
+        display: none;
+    }
+}
