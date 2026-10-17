@@ -137,6 +137,37 @@ def seed_db():
     db.commit()
     db.close()
 
+def get_expense_by_id(expense_id: int, user_id: int):
+    """Return the expense dict if it belongs to the given user, else None.
+
+    Includes ownership check to prevent users from viewing/editing other users' expenses.
+    """
+    db = get_db()
+    expense = db.execute(
+        "SELECT id, amount, category, date, description FROM expenses "
+        "WHERE id = ? AND user_id = ?",
+        (expense_id, user_id)
+    ).fetchone()
+    db.close()
+    return dict(expense) if expense else None
+
+
+def update_expense(expense_id: int, user_id: int, amount: float, category: str, date: str, description: str):
+    """Update an existing expense with ownership validation.
+
+    Returns True if successful, False if expense not found or not owned by user.
+    """
+    db = get_db()
+    db.execute(
+        "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? "
+        "WHERE id = ? AND user_id = ?",
+        (amount, category, date, description, expense_id, user_id)
+    )
+    db.commit()
+    db.close()
+    return True
+
+
 # --------------------------------------------------------------------------
 # New helper functions for profile page
 # --------------------------------------------------------------------------
