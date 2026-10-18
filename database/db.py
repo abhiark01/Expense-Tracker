@@ -4,7 +4,8 @@ from datetime import date
 
 from werkzeug.security import generate_password_hash
 
-DB_PATH = "spendly.db"
+import os
+DB_PATH = os.environ.get("DB_PATH", "spendly.db")
 
 
 def get_db():
